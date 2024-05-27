@@ -553,7 +553,7 @@ comulative_returns <- merged_all_results |>
 # Set names for different scenarions
 scenario_names_mapping <- c("scenario_1" = "Agnostic sort - value weighted (gross return)",
                             "scenario_2" = "Agnostic sort - value weighted (net return)",
-                            "scenario_3" = "Agnosnitc sort - equal weighted (gross return)",
+                            "scenario_3" = "Agnostic sort - equal weighted (gross return)",
                             "scenario_4" = "Agnostic sort - equal weighted (net return)",
                             "scenario_5" = "Cost-sensitive sort - equal weighted (gross return)",
                             "scenario_6" = "Cost-sensitive sort - equal weighted (net return)")
@@ -681,7 +681,7 @@ breakeven <- function(scenario, data) {
 plan(multisession)
 
 # Compute portfolios across wealth levels in parallel
-all_breakeven_results <- future_lapply(seq(0.00001, 5000000000, by = 10000000), breakeven, data= merged_data)
+all_breakeven_results <- future_lapply(seq(0.00001, 5000000000, by = 1000000000), breakeven, data= merged_data)
 
 # Bind results from computations
 all_breakeven_results <- do.call(rbind, all_breakeven_results)
@@ -692,11 +692,11 @@ plan(sequential)
 
 # Retrieve market portfolio for each of the scenarios in all_results
 market_portfolio_rows <- data.frame(
-  month = rep(unique(market_return_df$month), each = length(seq(0.00001, 5000000000, by = 10000000))),
-  net_return = rep(market_return_df$market_ret[match(unique(market_return_df$month), market_return_df$month)], each = length(seq(0.00001, 5000000000, by = 10000000))),
+  month = rep(unique(market_return_df$month), each = length(seq(0.00001, 5000000000, by = 1000000000))),
+  net_return = rep(market_return_df$market_ret[match(unique(market_return_df$month), market_return_df$month)], each = length(seq(0.00001, 5000000000, by = 1000000000))),
   portfolio = "Market portfolio",
-  agnostic_of_TC = rep(c("Agnostic", "Cost-sensitve"), each = length(seq(0.00001, 5000000000, by = 10000000)), times = length(unique(market_return_df$month))),
-  scenario = rep(seq(0.00001, 5000000000, by = 10000000), length(unique(market_return_df$month)))
+  agnostic_of_TC = rep(c("Agnostic", "Cost-sensitve"), each = length(seq(0.00001, 5000000000, by = 1000000000)), times = length(unique(market_return_df$month))),
+  scenario = rep(seq(0.00001, 5000000000, by = 1000000000), length(unique(market_return_df$month)))
 )
 
 # Add columns in order to have same format as all_results
@@ -1423,29 +1423,30 @@ for (scenario in scenarios) {
   # Perform the regression
   model <- lm(formula, data = data_for_reg)
   
-  # Get the summary of the model
-  summary_model <- summary(model)
+  # Get Newey-West standard errors using coeftest
+  coef_test <- coeftest(model, vcov = NeweyWest(model))
   
-  # Extract coefficients and standard errors
-  coefficients <- coef(summary_model)
+  # Extract coefficients and Newey-West standard errors from coef_test
+  coefficients <- coef_test[, "Estimate"]
+  nw_se <- coef_test[, "Std. Error"]
   
   # Store results in a named list
   regression_results[[scenario]] <- list(
-    alpha_FF = 12 * 100 * coefficients["(Intercept)", "Estimate"],
-    beta_smb = coefficients["smb", "Estimate"],
-    beta_hml = coefficients["hml", "Estimate"],
-    beta_rmw = coefficients["rmw", "Estimate"],
-    beta_cma = coefficients["cma", "Estimate"],
-    beta_mkt = coefficients["mkt", "Estimate"],
-    beta_MOM = coefficients["MOM", "Estimate"],
-    alpha_FF_se = sqrt(12) * 100 * coefficients["(Intercept)", "Std. Error"],
-    beta_smb_se = coefficients["smb", "Std. Error"],
-    beta_hml_se = coefficients["hml", "Std. Error"],
-    beta_rmw_se = coefficients["rmw", "Std. Error"],
-    beta_cma_se = coefficients["cma", "Std. Error"],
-    beta_mkt_se = coefficients["mkt", "Std. Error"],
-    beta_MOM_se = coefficients["MOM", "Std. Error"],
-    r_squared = summary_model$r.squared
+    alpha_FF = 12 * 100 * coefficients["(Intercept)"],
+    beta_smb = coefficients["smb"],
+    beta_hml = coefficients["hml"],
+    beta_rmw = coefficients["rmw"],
+    beta_cma = coefficients["cma"],
+    beta_mkt = coefficients["mkt"],
+    beta_MOM = coefficients["MOM"],
+    alpha_FF_se = sqrt(12) * 100 * nw_se["(Intercept)"],
+    beta_smb_se = nw_se["smb"],
+    beta_hml_se = nw_se["hml"],
+    beta_rmw_se = nw_se["rmw"],
+    beta_cma_se = nw_se["cma"],
+    beta_mkt_se = nw_se["mkt"],
+    beta_MOM_se = nw_se["MOM"],
+    r_squared = summary(model)$r.squared
   )
 }
 
