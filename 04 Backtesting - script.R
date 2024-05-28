@@ -282,7 +282,6 @@ hac <- function(ret, digits = 3)
        Standard.Errors = se, p.Value = PV)
 }
 
-
 compute.se.Parzen <- function(ret)
 {
   ret1 = ret[, 1]
@@ -551,12 +550,12 @@ comulative_returns <- merged_all_results |>
 
 
 # Set names for different scenarions
-scenario_names_mapping <- c("scenario_1" = "Agnostic sort - value weighted (gross return)",
-                            "scenario_2" = "Agnostic sort - value weighted (net return)",
-                            "scenario_3" = "Agnostic sort - equal weighted (gross return)",
-                            "scenario_4" = "Agnostic sort - equal weighted (net return)",
-                            "scenario_5" = "Cost-sensitive sort - equal weighted (gross return)",
-                            "scenario_6" = "Cost-sensitive sort - equal weighted (net return)")
+scenario_names_mapping <- c("scenario_1" = "Agnostic Sort - Value Weighted (Gross Return)",
+                            "scenario_2" = "Agnostic Sort - Value Weighted (Net Return)",
+                            "scenario_3" = "Agnostic Sort - Equal Weighted (Gross Return)",
+                            "scenario_4" = "Agnostic Sort - Equal Weighted (Net Return)",
+                            "scenario_5" = "Cost-Sensitive Sort - Equal Weighted (Gross Return)",
+                            "scenario_6" = "Cost-Sensitive Sort - Equal Weighted (Net Return)")
 
 
 # Choose relevant scenarions for figure 1
@@ -581,10 +580,11 @@ Plot_1 <-ggplot(data = figure_1_data, aes(x = month, y = net_return_comp, color 
         scale_linetype_manual(values = c("Market portfolio" = "dotted", "Short" = "solid", "Long" = "solid", "Long-Short" = "solid")) +
         ggtitle("") +
         xlab("") +
-        ylab("Comulative log return") +
+        ylab("Cumulative Log Return") +
         theme_gray() +
+        labs (linetype = "", color = "") +
         theme(plot.title = element_text(hjust = 0.5), axis.line.y = element_line(color = "gray"),
-              text = element_text(size = 15))
+              text = element_text(size = 15), legend.position = "bottom")
 Plot_1
 
   
@@ -1054,33 +1054,29 @@ short_portfolio_firms_long <- Short_portfolio_firms_merge |>
   mutate(characteristic = gsub("^characteristic_", "", characteristic))
 
 
-new_names <- c("Size", "1-month momentum", "Illiquidity", "Return Volatility", 
-               "12-month momentum", "Earnings/Price", "Cash flow/Debt", "Cash flow/Price", "Return on Invested Capital")
-
-
 long_portfolio_firms_long <- long_portfolio_firms_long|>
   mutate(characteristic = recode(characteristic,
                                   mvel1 = "Size",
-                                  mom1m = "1-month momentum",
+                                  mom1m = "1-Month Momentum",
                                   ill = "Illiquidity",
                                   retvol = "Return Volatility",
-                                  mom12m = "12-month momentum",
+                                  mom12m = "12-Month Momentum",
                                   ep = "Earnings/Price",
-                                  cashdebt = "Cash flow/Debt",
-                                  cfp = "Cash flow/Price",
+                                  cashdebt = "Cash Flow/Debt",
+                                  cfp = "Cash Flow/Price",
                                   roic = "Return on Invested Capital"
   ))
 
 short_portfolio_firms_long <- short_portfolio_firms_long|>
   mutate(characteristic = recode(characteristic,
                                  mvel1 = "Size",
-                                 mom1m = "1-month momentum",
+                                 mom1m = "1-Month Momentum",
                                  ill = "Illiquidity",
                                  retvol = "Return Volatility",
-                                 mom12m = "12-month momentum",
+                                 mom12m = "12-Month Momentum",
                                  ep = "Earnings/Price",
-                                 cashdebt = "Cash flow/Debt",
-                                 cfp = "Cash flow/Price",
+                                 cashdebt = "Cash Flow/Debt",
+                                 cfp = "Cash Flow/Price",
                                  roic = "Return on Invested Capital"
   ))
 
@@ -1089,8 +1085,8 @@ short_portfolio_firms_long <- short_portfolio_firms_long|>
 ###################### PLOTTING CHARACTERISTICS #################################################################################
 
 
-desired_order <- c("Size", "1-month momentum", "Illiquidity", "Return Volatility", 
-                   "12-month momentum", "Earnings/Price", "Cash flow/Debt", "Cash flow/Price", "Return on Invested Capital")
+desired_order <- c("Size", "1-Month Momentum", "Illiquidity", "Return Volatility", 
+                   "12-Month Momentum", "Earnings/Price", "Cash Flow/Debt", "Cash Flow/Price", "Return on Invested Capital")
 
 
 
@@ -1187,11 +1183,11 @@ all_chosen_weights_df <- do.call(rbind, all_chosen_weights)
 
 all_chosen_weights_df <- all_chosen_weights_df|>
   mutate(Wealth = case_when(
-    Wealth == 0.000001 ~ "0m (Agnostic)",
-    Wealth == 100000000 ~ "100m",
-    Wealth == 1000000000 ~ "1000m",
-    Wealth == 3000000000 ~ "3000m",
-    Wealth == 5000000000 ~ "5000m",
+    Wealth == 0.000001 ~ "0 (Agnostic)",
+    Wealth == 100000000 ~ "100",
+    Wealth == 1000000000 ~ "1000",
+    Wealth == 3000000000 ~ "3000",
+    Wealth == 5000000000 ~ "5000",
     TRUE ~ as.character(Wealth)
   ))
 
@@ -1220,13 +1216,13 @@ long_portfolio_firms_long <- Portfolio_firms_merge |>
 long_portfolio_firms_long <- long_portfolio_firms_long|>
   mutate(characteristic = recode(characteristic,
                                  mvel1 = "Size",
-                                 mom1m = "1-month momentum",
+                                 mom1m = "1-Month Momentum",
                                  ill = "Illiquidity",
                                  retvol = "Return Volatility",
-                                 mom12m = "12-month momentum",
+                                 mom12m = "12-Month Momentum",
                                  ep = "Earnings/Price",
-                                 cashdebt = "Cash flow/Debt",
-                                 cfp = "Cash flow/Price",
+                                 cashdebt = "Cash Flow/Debt",
+                                 cfp = "Cash Flow/Price",
                                  roic = "Return on Invested Capital"
   ))
 
@@ -1235,7 +1231,7 @@ long_portfolio_firms_long <- long_portfolio_firms_long|>
 
 
 #Plotting
-long_portfolio_firms_long$Wealth <- factor(long_portfolio_firms_long$Wealth, levels = c("0m (Agnostic)", "100m", "1000m", "3000m", "5000m"))
+long_portfolio_firms_long$Wealth <- factor(long_portfolio_firms_long$Wealth, levels = c("0 (Agnostic)", "100", "1000", "3000", "5000"))
 
 
 # Convert the characteristic variable to a factor with desired order
@@ -1246,7 +1242,7 @@ long_portfolio_firms_long$characteristic <- factor(long_portfolio_firms_long$cha
 p <- ggplot(long_portfolio_firms_long, aes(x=value, y=Wealth, group = Wealth)) + 
   geom_density_ridges(alpha=0.2) +
   facet_wrap(characteristic ~ ., ncol = 3) +
-  labs(x = "", y="Portfolio Size", fill = "", color = "") +
+  labs(x = "", y="Portfolio Size (mUSD)", fill = "", color = "") +
   theme(legend.position = "bottom", text = element_text(size = 12))  # Place legend at the bottom
 
 p
