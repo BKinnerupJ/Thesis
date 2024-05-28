@@ -681,7 +681,7 @@ breakeven <- function(scenario, data) {
 plan(multisession)
 
 # Compute portfolios across wealth levels in parallel
-all_breakeven_results <- future_lapply(seq(0.00001, 5000000000, by = 1000000000), breakeven, data= merged_data)
+all_breakeven_results <- future_lapply(seq(0.00001, 5000000000, by = 10000000), breakeven, data= merged_data)
 
 # Bind results from computations
 all_breakeven_results <- do.call(rbind, all_breakeven_results)
@@ -692,11 +692,11 @@ plan(sequential)
 
 # Retrieve market portfolio for each of the scenarios in all_results
 market_portfolio_rows <- data.frame(
-  month = rep(unique(market_return_df$month), each = length(seq(0.00001, 5000000000, by = 1000000000))),
-  net_return = rep(market_return_df$market_ret[match(unique(market_return_df$month), market_return_df$month)], each = length(seq(0.00001, 5000000000, by = 1000000000))),
+  month = rep(unique(market_return_df$month), each = length(seq(0.00001, 5000000000, by = 10000000))),
+  net_return = rep(market_return_df$market_ret[match(unique(market_return_df$month), market_return_df$month)], each = length(seq(0.00001, 5000000000, by = 10000000))),
   portfolio = "Market portfolio",
-  agnostic_of_TC = rep(c("Agnostic", "Cost-sensitve"), each = length(seq(0.00001, 5000000000, by = 1000000000)), times = length(unique(market_return_df$month))),
-  scenario = rep(seq(0.00001, 5000000000, by = 1000000000), length(unique(market_return_df$month)))
+  agnostic_of_TC = rep(c("Agnostic", "Cost-sensitve"), each = length(seq(0.00001, 5000000000, by = 10000000)), times = length(unique(market_return_df$month))),
+  scenario = rep(seq(0.00001, 5000000000, by = 10000000), length(unique(market_return_df$month)))
 )
 
 # Add columns in order to have same format as all_results
@@ -1246,7 +1246,7 @@ long_portfolio_firms_long$characteristic <- factor(long_portfolio_firms_long$cha
 p <- ggplot(long_portfolio_firms_long, aes(x=value, y=Wealth, group = Wealth)) + 
   geom_density_ridges(alpha=0.2) +
   facet_wrap(characteristic ~ ., ncol = 3) +
-  labs(x = "", y="Investment Size", fill = "", color = "") +
+  labs(x = "", y="Portfolio Size", fill = "", color = "") +
   theme(legend.position = "bottom", text = element_text(size = 12))  # Place legend at the bottom
 
 p
